@@ -1,0 +1,6 @@
+Notes
+ Sprawdzenie czy nie da się wykorzystać Python(czy nie będzie łatwiej?) 
+  istnieje biblioteka PySerial i wygląda okej – zaleta -> omijamy labview i dziwne wymagania prowadzących, w pythonie wszystko jest łatwiejsze; wada -> musimy stworzyć GUI – tkinker/PyQt5(nie zajmie to długo), mniejsza możliwość uzyskania pomocy od prowadzących
+ czy w  pracowni jest python 3? Jeśli nie to czy można zainstalować?
+Wymyślenie jak wykorzystać te niezbędne rzeczy  o których mówił furman – coś tam z event
+Jeśli projekt nie do końca będzi działał podpytać furmana jakie rzeczy można dodać aby zagwarantować sobie w miarę bezbolesne zdanie
