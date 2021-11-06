@@ -133,7 +133,7 @@ class MainWindow(UiMainWindow):
         self.intro_window = IntroWindow(self.window, start_window)
         self.start_window.hide()
 
-        self.image_editor_window = None
+        self.instruction_path = Path(__file__).parent / "resources/instruction.pdf"
 
         self.instruction_button.clicked.connect(self.show_instruction)
         self.start_stop_button.clicked.connect(self.start_translation)
@@ -148,8 +148,7 @@ class MainWindow(UiMainWindow):
             self.start_stop_button.setText(_translate("main_window", "Start"))
 
     def show_instruction(self):
-        current_dir = Path(__file__).parent
-        webbrowser.open_new(current_dir / "../project_description/AO_dokumentacja_projektu.pdf")
+        webbrowser.open_new(str(self.instruction_path))
 
     def hide_window(self):
         self.intro_window.intro_window.show()
