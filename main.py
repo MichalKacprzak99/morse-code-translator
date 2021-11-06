@@ -1,8 +1,11 @@
 import glob
-import time
 import sys
 
 import serial
+
+from PyQt5 import QtWidgets
+
+from morse_code_translator.gui.main_window import MainWindow
 
 
 def read_arduino(arduino):
@@ -40,9 +43,14 @@ def serial_ports():
 
 
 if __name__ == '__main__':
-    print(serial_ports())
-    arduino = serial.Serial('COM4', 9600)
-    time.sleep(1)
-    while True:
-        time.sleep(0.1)
-        print(str(arduino.read(1), "utf-8"))
+    # print(serial_ports())
+    # arduino = serial.Serial('COM4', 9600)
+    # time.sleep(1)
+    # while True:
+    #     time.sleep(0.1)
+    #     print(str(arduino.read(1), "utf-8"))
+    app = QtWidgets.QApplication(sys.argv)
+    window = QtWidgets.QMainWindow()
+    start_window = MainWindow(window)
+    start_window.start()
+    sys.exit(app.exec_())
