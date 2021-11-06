@@ -1,12 +1,15 @@
 import webbrowser
 from pathlib import Path
+from typing import Optional
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QObject, QThreadPool, pyqtSignal
 
 from morse_code_translator.gui.intro_window import IntroWindow
+from morse_code_translator.gui.morse_translator import MorseTranslator
 
 
-class UiMainWindow(object):
+class UiMainWindow(QObject):
     def setupUi(self, main_window):
         self.start_window = main_window
         self.start_window.setObjectName("main_window")
@@ -35,15 +38,18 @@ class UiMainWindow(object):
         self.text_vertical_layout.setContentsMargins(0, 0, 0, 0)
         self.text_vertical_layout.setObjectName("text_vertical_layout")
 
-        self.morse_code_text = QtWidgets.QTextBrowser(self.verticalLayoutWidget_2)
         font = QtGui.QFont()
         font.setPointSize(12)
+
+        self.morse_code_text = QtWidgets.QTextBrowser(self.verticalLayoutWidget_2)
+
         self.morse_code_text.setFont(font)
         self.morse_code_text.setReadOnly(False)
         self.morse_code_text.setObjectName("morse_code_text")
         self.text_vertical_layout.addWidget(self.morse_code_text)
 
         self.translated_morse_code_text = QtWidgets.QTextBrowser(self.verticalLayoutWidget_2)
+        self.translated_morse_code_text.setFont(font)
         self.translated_morse_code_text.setObjectName("translated_morse_code_text")
         self.text_vertical_layout.addWidget(self.translated_morse_code_text)
 
@@ -97,61 +103,83 @@ class UiMainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(self.start_window)
 
     def retranslateUi(self):
-        _translate = QtCore.QCoreApplication.translate
-        self.start_window.setWindowTitle(_translate("main_window", "main_window"))
-        self.title.setText(_translate("main_window", "Morse code translator"))
-        self.footer.setText(_translate("main_window",
+        self.translate = QtCore.QCoreApplication.translate
+        self.start_window.setWindowTitle(self.translate("main_window", "main_window"))
+        self.title.setText(self.translate("main_window", "Morse code translator"))
+        self.footer.setText(self.translate("main_window",
                                        "<html><head/><body><p align=\"center\">Michał Kacprzak &amp; Jakub Strugała</p><p align=\"center\">Komputeryzacja pomiarów 2021, Wydział Fizyki i Informatyki Stosowanej</p></body></html>"))
-        self.morse_code_text.setHtml(_translate("main_window",
+        self.morse_code_text.setHtml(self.translate("main_window",
                                                 "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
                                                 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
                                                 "p, li { white-space: pre-wrap; }\n"
                                                 "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:12pt; font-weight:400; font-style:normal;\">\n"
                                                 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Morse code</p></body></html>"))
-        self.translated_morse_code_text.setHtml(_translate("main_window",
+        self.translated_morse_code_text.setHtml(self.translate("main_window",
                                                            "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
                                                            "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
                                                            "p, li { white-space: pre-wrap; }\n"
                                                            "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.8pt; font-weight:400; font-style:normal;\">\n"
                                                            "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:12pt;\">Translated morse code</span></p></body></html>"))
-        self.start_stop_button.setText(_translate("main_window", "Start"))
+        self.start_stop_button.setText(self.translate("main_window", "Start"))
 
-        self.unit_length_select.setItemText(0, _translate("main_window", "Select unit length in seconds"))
-        self.unit_length_select.setItemText(1, _translate("main_window", "1"))
-        self.unit_length_select.setItemText(2, _translate("main_window", "2"))
-        self.unit_length_select.setItemText(3, _translate("main_window", "5"))
-        self.unit_length_select.setItemText(4, _translate("main_window", "10"))
+        self.unit_length_select.setItemText(0, self.translate("main_window", "Select unit length in seconds"))
+        self.unit_length_select.setItemText(1, self.translate("main_window", "1"))
+        self.unit_length_select.setItemText(2, self.translate("main_window", "2"))
+        self.unit_length_select.setItemText(3, self.translate("main_window", "5"))
+        self.unit_length_select.setItemText(4, self.translate("main_window", "10"))
 
-        self.analyze_button.setText(_translate("main_window", "Analyze"))
-        self.instruction_button.setText(_translate("main_window", "Instruction"))
+        self.analyze_button.setText(self.translate("main_window", "Analyze"))
+        self.instruction_button.setText(self.translate("main_window", "Instruction"))
 
 
 class MainWindow(UiMainWindow):
+    stop_signal = pyqtSignal()
+
     def __init__(self, start_window):
+        super().__init__()
         self.setupUi(start_window)
         self.window = QtWidgets.QMainWindow()
         self.intro_window = IntroWindow(self.window, start_window)
         self.start_window.hide()
 
-        self.instruction_path = Path(__file__).parent / "resources/instruction.pdf"
+        self.morse_translator: Optional[MorseTranslator] = None
+        self.thread_pool: Optional[QThreadPool] = None
 
         self.instruction_button.clicked.connect(self.show_instruction)
         self.start_stop_button.clicked.connect(self.start_translation)
 
     def start_translation(self):
-        _translate = QtCore.QCoreApplication.translate
         if self.start_stop_button.text() == "Start":
-            self.start_stop_button.setText(_translate("main_window", "Stop"))
-            self.morse_code_text.setText(_translate("main_window", ""))
-            self.translated_morse_code_text.setText(_translate("main_window", ""))
-        else:
-            self.start_stop_button.setText(_translate("main_window", "Start"))
+            self.start_stop_button.setText(self.translate("main_window", "Stop"))
+            self.morse_code_text.setText(self.translate("main_window", ""))
+            self.translated_morse_code_text.setText(self.translate("main_window", ""))
 
-    def show_instruction(self):
-        webbrowser.open_new(str(self.instruction_path))
+            unit_length = self.unit_length_select.currentText()
+            self.morse_translator = MorseTranslator(unit_length=int(unit_length))
+            self.thread_pool = QThreadPool()
+
+            self.stop_signal.connect(self.morse_translator.stop)
+            self.thread_pool.start(self.morse_translator)
+
+            self.morse_translator.signals.translated_morse_code.connect(self.update_translated_morse_code_text)
+            self.morse_translator.signals.morse_code.connect(self.update_morse_code_text)
+        else:
+            self.start_stop_button.setText(self.translate("main_window", "Start"))
+            self.stop_signal.emit()
+
+    @staticmethod
+    def show_instruction():
+        instruction_path = Path(__file__).parent / "resources/instruction.pdf"
+        webbrowser.open_new(str(instruction_path))
 
     def hide_window(self):
         self.intro_window.intro_window.show()
 
     def start(self):
         self.intro_window.start()
+
+    def update_morse_code_text(self, morse_code_sign):
+        self.morse_code_text.insertPlainText(self.translate("main_window", morse_code_sign))
+
+    def update_translated_morse_code_text(self, translated_char):
+        self.translated_morse_code_text.insertPlainText(self.translate("main_window", translated_char))
