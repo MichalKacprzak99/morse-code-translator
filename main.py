@@ -52,5 +52,5 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     window = QtWidgets.QMainWindow()
     start_window = MainWindow(window)
-    start_window.start()
+    start_window.start_application()
     sys.exit(app.exec_())
