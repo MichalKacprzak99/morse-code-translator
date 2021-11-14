@@ -67,6 +67,12 @@ class UiMainWindow(QObject):
         self.start_stop_button.setObjectName("start_stop_button")
         self.config_layout.addWidget(self.start_stop_button)
 
+        self.select_error = QtWidgets.QLabel(self.verticalLayoutWidget)
+        self.select_error.setGeometry(QtCore.QRect(50, 60, 200, 81))
+        self.select_error.hide()
+        self.select_error.setObjectName("footer")
+
+
         self.unit_length_select = QtWidgets.QComboBox(self.verticalLayoutWidget)
         font = QtGui.QFont()
         font.setPointSize(12)
@@ -106,6 +112,7 @@ class UiMainWindow(QObject):
         self.translate = QtCore.QCoreApplication.translate
         self.start_window.setWindowTitle(self.translate("main_window", "main_window"))
         self.title.setText(self.translate("main_window", "Morse code translator"))
+        self.select_error.setText(self.translate("main_window", "<font color='red'>Error! Please select unit length!</font>"))
         self.footer.setText(self.translate("main_window",
                                            "<html><head/><body><p align=\"center\">Michał Kacprzak &amp; Jakub Strugała</p><p align=\"center\">Komputeryzacja pomiarów 2021, Wydział Fizyki i Informatyki Stosowanej</p></body></html>"))
         self.morse_code_text.setHtml(self.translate("main_window",
@@ -147,6 +154,7 @@ class MainWindow(UiMainWindow):
 
         self.instruction_button.clicked.connect(self.show_instruction)
         self.start_stop_button.clicked.connect(self.handle_translation)
+        self.unit_length_select.currentIndexChanged.connect(self.on_unit_length_select_change)
 
     def handle_translation(self):
         if self.start_stop_button.text() == "Start":
@@ -155,16 +163,17 @@ class MainWindow(UiMainWindow):
             self._stop_translation()
 
     def _start_translation(self):
-        self.start_stop_button.setText(self.translate("main_window", "Stop"))
-        self.morse_code_text.setText(self.translate("main_window", ""))
-        self.translated_morse_code_text.setText(self.translate("main_window", ""))
-
-        unit_length = self.unit_length_select.currentText()
-        self.morse_translator = MorseTranslator(int(unit_length))
-
-        self.stop_signal.connect(self.morse_translator.stop_translation)
-        self.thread_pool.start(self.morse_translator)
-        self._set_up_morse_translator_connection()
+        if self.unit_length_select.currentIndex() != 0:
+            self.start_stop_button.setText(self.translate("main_window", "Stop"))
+            self.morse_code_text.setText(self.translate("main_window", ""))
+            self.translated_morse_code_text.setText(self.translate("main_window", ""))
+            unit_length = self.unit_length_select.currentText()
+            self.morse_translator = MorseTranslator(int(unit_length))
+            self.stop_signal.connect(self.morse_translator.stop_translation)
+            self.thread_pool.start(self.morse_translator)
+            self._set_up_morse_translator_connection()
+        else:
+            self.select_error.show()
 
     def _set_up_morse_translator_connection(self):
         self.morse_translator.signals.translated_morse_code.connect(self._update_translated_morse_code_text)
@@ -179,6 +188,10 @@ class MainWindow(UiMainWindow):
 
     def _update_translated_morse_code_text(self, translated_char):
         self.translated_morse_code_text.insertPlainText(self.translate("main_window", translated_char))
+
+    def on_unit_length_select_change(self, index):
+        if index != 0:
+            self.select_error.hide()
 
     @staticmethod
     def show_instruction():
