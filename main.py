@@ -5,7 +5,7 @@ import serial
 
 from PyQt5 import QtWidgets
 
-from morse_code_translator.gui.main_window import MainWindow
+from morse_code_translator.gui import MainWindow as MorseTranslatorApp
 
 
 def read_arduino(arduino):
@@ -51,6 +51,6 @@ if __name__ == '__main__':
     #     print(str(arduino.read(1), "utf-8"))
     app = QtWidgets.QApplication(sys.argv)
     window = QtWidgets.QMainWindow()
-    start_window = MainWindow(window)
-    start_window.start_application()
+    morse_translator_app = MorseTranslatorApp(window)
+    morse_translator_app.start_application()
     sys.exit(app.exec_())
