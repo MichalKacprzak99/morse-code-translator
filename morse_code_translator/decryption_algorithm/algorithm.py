@@ -1,3 +1,4 @@
+import logging
 from random import seed, randint
 from typing import Optional
 
@@ -10,6 +11,12 @@ TIME_UNIT = 1
 INTERVAL = 0.1
 CHARACTERS_PER_TIME_UNIT = int(TIME_UNIT / INTERVAL)
 MARGIN_OF_ERROR = 3
+
+# logger
+logging.basicConfig(filename='algorithm.log',
+                    filemode='w',
+                    format='[%(filename)s:%(lineno)d %(levelname)s] %(message)s\t',
+                    level=logging.DEBUG)
 
 
 def translate_numbers_to_enum(arduino_substring: str, click_index: int) -> Optional[Symbol]:
@@ -40,6 +47,8 @@ def translate_numbers_to_enum(arduino_substring: str, click_index: int) -> Optio
         else:
             print(
                 '\t(Disclaimer): poczatkowy ciag znakow prawdopodobnie bedzie wykraczal poza ustalony margines bledu.\n')
+            return Symbol.Default
+
     else:
         if abs(len(arduino_substring) - CHARACTERS_PER_TIME_UNIT) <= MARGIN_OF_ERROR:  # "."
             return Symbol.Dot
@@ -96,6 +105,10 @@ def convert_from_arduino_to_morse(arduino_data: str) -> str:
                 # resetujemy indeks klikniec prez zalozenie parzystosci (patrz translate_numbers_to_enum)
                 click_index = 0
             result = translate_numbers_to_enum(arduino_data[end_of_substring_index:idx], click_index)
+            logging.info(
+                f'Click_index = {click_index}, substring = {arduino_data[end_of_substring_index:idx]}, '
+                f'length: {len(arduino_data[end_of_substring_index:idx])}, '
+                f'result: Enum -> {result}, Value -> {result.value}')
             if result == Symbol.Dot or result == Symbol.Dash:
                 nr_of_spaces = 0
                 result_in_morse += result.value
