@@ -2,9 +2,9 @@ import logging
 from random import seed, randint
 from typing import Optional
 
-from morse_code_translator.decryption_algorithm.morse_code_translation.decrypt_from_morse import decrypt_from_morse
-from morse_code_translator.decryption_algorithm.morse_code_translation.encrypt_to_morse import encrypt_to_morse
-from morse_code_translator.decryption_algorithm.symbol import Symbol
+from morse_code_translation import decrypt_from_morse
+from morse_code_translation import encrypt_to_morse
+from morse_code_symbol import MorseCodeSymbol
 
 # constants
 TIME_UNIT = 1
@@ -19,7 +19,7 @@ logging.basicConfig(filename='algorithm.log',
                     level=logging.DEBUG)
 
 
-def translate_numbers_to_enum(arduino_substring: str, click_index: int) -> Optional[Symbol]:
+def translate_numbers_to_enum(arduino_substring: str, click_index: int) -> Optional[MorseCodeSymbol]:
     """
     W zaleznosci od tego ktore to z kolei klikniecie, inaczej jest interpretowany ciag znakow.
     Zakladamy ze poczatkowy ciag znakow jakie wyrzuca arduino nie jest brany pod uwage do translacji,
@@ -29,33 +29,33 @@ def translate_numbers_to_enum(arduino_substring: str, click_index: int) -> Optio
     Kolejne klikniecie skutkuje inkrementacja click_indexu i oznacza, ze przerwalismy mierzenie pierwszego symbolu.
     Po nim nastepuja przerwa danej dlugosc znakow interpretowane jako spacja i kolejne klikniecie.
 
-    Zatem po nieparzystym click_indexie bedzie zawsze spacja -> Symbol.One / Symbol.Three albo Symbol.Seven
+    Zatem po nieparzystym click_indexie bedzie zawsze spacja -> MorseCodeSymbol.One / MorseCodeSymbol.Three albo MorseCodeSymbol.Seven
     !!! Z wyjatkiem przypadku gdzie mamy spacje po spacji przy oddzieleniu dwoch slow od siebie, ten przypadek jest
     obsluzony w linii 94, (dlatego liczenie spacji nastepujacych po sobie bylo konieczne)
 
     :param arduino_substring: ciag znakow samych zer albo jedynek pobrany do interpretacji
     :param click_index: indeks kolejnych klikniec
-    :return: enum typu Symbol
+    :return: enum typu MorseCodeSymbol
     """
     if click_index % 2 != 0:
         if abs(len(arduino_substring) - CHARACTERS_PER_TIME_UNIT) <= MARGIN_OF_ERROR:  # spacja pomiedzy "." a "-"
-            return Symbol.One
+            return MorseCodeSymbol.One
         elif abs(len(arduino_substring) - 3 * CHARACTERS_PER_TIME_UNIT) <= MARGIN_OF_ERROR:  # spacja pomiedzy literami
-            return Symbol.Three
+            return MorseCodeSymbol.Three
         elif abs(len(arduino_substring) - 7 * CHARACTERS_PER_TIME_UNIT) <= MARGIN_OF_ERROR:  # spacja pomiedzy slowami
-            return Symbol.Seven
+            return MorseCodeSymbol.Seven
         else:
             print(
                 '\t(Disclaimer): poczatkowy ciag znakow prawdopodobnie bedzie wykraczal poza ustalony margines bledu.\n')
-            return Symbol.Default
+            return MorseCodeSymbol.Default
 
     else:
         if abs(len(arduino_substring) - CHARACTERS_PER_TIME_UNIT) <= MARGIN_OF_ERROR:  # "."
-            return Symbol.Dot
+            return MorseCodeSymbol.Dot
         elif abs(len(arduino_substring) - 3 * CHARACTERS_PER_TIME_UNIT) <= MARGIN_OF_ERROR:  # "-"
-            return Symbol.Dash
+            return MorseCodeSymbol.Dash
         elif abs(len(arduino_substring) - 7 * CHARACTERS_PER_TIME_UNIT) <= MARGIN_OF_ERROR:  # spacja pomiedzy slowami
-            return Symbol.Seven
+            return MorseCodeSymbol.Seven
         else:
             raise Exception(f'Przekroczono mozliwy margines bledu, liczba znakow: {len(arduino_substring)}')
 
@@ -101,7 +101,7 @@ def convert_from_arduino_to_morse(arduino_data: str) -> str:
         if temp_val != val:
             click_index += 1
             if nr_of_spaces == 2:
-                result_in_english += ' '  # skoro 2x Symbol.Seven -> dodajemy spacje do rezultatu
+                result_in_english += ' '  # skoro 2x MorseCodeSymbol.Seven -> dodajemy spacje do rezultatu
                 # resetujemy indeks klikniec prez zalozenie parzystosci (patrz translate_numbers_to_enum)
                 click_index = 0
             result = translate_numbers_to_enum(arduino_data[end_of_substring_index:idx], click_index)
@@ -109,15 +109,15 @@ def convert_from_arduino_to_morse(arduino_data: str) -> str:
                 f'Click_index = {click_index}, substring = {arduino_data[end_of_substring_index:idx]}, '
                 f'length: {len(arduino_data[end_of_substring_index:idx])}, '
                 f'result: Enum -> {result}, Value -> {result.value}')
-            if result == Symbol.Dot or result == Symbol.Dash:
+            if result == MorseCodeSymbol.Dot or result == MorseCodeSymbol.Dash:
                 nr_of_spaces = 0
                 result_in_morse += result.value
-            elif result == Symbol.Three:  # Symbol.Three - spacja pomiedzy literami
+            elif result == MorseCodeSymbol.Three:  # MorseCodeSymbol.Three - spacja pomiedzy literami
                 nr_of_spaces = 0
                 result_in_english += decrypt_from_morse(
                     result_in_morse.upper())  # skoro ltera gotowa, mozna rozszyfrowac
                 result_in_morse = ''  # resetujemy zmienna trzymajaca symbole
-            elif result == Symbol.Seven:  # Symbol.Seven - spacja pomiedzy slowami
+            elif result == MorseCodeSymbol.Seven:  # MorseCodeSymbol.Seven - spacja pomiedzy slowami
                 nr_of_spaces += 1
                 result_in_morse += ' '
             else:
