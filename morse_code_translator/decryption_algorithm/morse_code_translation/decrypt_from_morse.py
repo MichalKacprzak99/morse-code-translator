@@ -1,9 +1,6 @@
-import json
-from pathlib import Path
+from .utils import load_morse_code_dict
 
-path = Path(__file__).parent / 'static/morse-code-dict.json'
-with path.open() as f:
-    MORSE_CODE_DICT = json.load(f)
+MORSE_CODE_DICT = load_morse_code_dict()
 
 
 def decrypt_from_morse(message):
