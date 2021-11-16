@@ -3,10 +3,10 @@ from pathlib import Path
 from typing import Optional
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QObject, QThreadPool, pyqtSignal
+from PyQt5.QtCore import QObject, QThread, QThreadPool, pyqtSignal
 
 from morse_code_translator.gui.intro_window import IntroWindow
-from morse_code_translator.gui.morse_translator import MorseTranslator
+from morse_code_translator.gui.morse_translator import ArduinoDataCollector, MorseTranslator
 
 
 class UiMainWindow(QObject):
@@ -156,6 +156,11 @@ class MainWindow(UiMainWindow):
         self.start_stop_button.clicked.connect(self.handle_translation)
         self.unit_length_select.currentIndexChanged.connect(self.on_unit_length_select_change)
 
+        self.thread = QThread()
+        self.arduino_data_collector = ArduinoDataCollector(arduino_port='COM4', arduino_baudrate=9600)
+        self.arduino_data_collector.moveToThread(self.thread)
+        self.thread.started.connect(self.arduino_data_collector.start)
+
     def handle_translation(self):
         if self.start_stop_button.text() == "Start":
             self._start_translation()
@@ -165,23 +170,29 @@ class MainWindow(UiMainWindow):
     def _start_translation(self):
         if self.unit_length_select.currentIndex() != 0:
             self.start_stop_button.setText(self.translate("main_window", "Stop"))
-            self.morse_code_text.setText(self.translate("main_window", ""))
-            self.translated_morse_code_text.setText(self.translate("main_window", ""))
+            self.morse_code_text.setText(self.translate("main_window", "Morse code"))
+            self.translated_morse_code_text.setText(self.translate("main_window", "Translated morse code"))
+
             unit_length = self.unit_length_select.currentText()
+
             self.morse_translator = MorseTranslator(int(unit_length))
+
             self.stop_signal.connect(self.morse_translator.stop_translation)
+            self.morse_translator.signals.translated_morse_code.connect(self._update_translated_morse_code_text)
+            self.morse_translator.signals.morse_code.connect(self._update_morse_code_text)
             self.thread_pool.start(self.morse_translator)
-            self._set_up_morse_translator_connection()
+
+            self.arduino_data_collector.collected_arduino_data.connect(self.morse_translator.read_arduino)
+            self.thread.start()
         else:
             self.select_error.show()
-
-    def _set_up_morse_translator_connection(self):
-        self.morse_translator.signals.translated_morse_code.connect(self._update_translated_morse_code_text)
-        self.morse_translator.signals.morse_code.connect(self._update_morse_code_text)
 
     def _stop_translation(self):
         self.start_stop_button.setText(self.translate("main_window", "Start"))
         self.stop_signal.emit()
+        self.arduino_data_collector.stop()
+        self.thread.quit()
+        self.thread.wait()
 
     def _update_morse_code_text(self, morse_code_sign):
         self.morse_code_text.insertPlainText(self.translate("main_window", morse_code_sign))
