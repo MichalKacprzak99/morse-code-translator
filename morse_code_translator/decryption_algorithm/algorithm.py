@@ -37,6 +37,8 @@ def translate_numbers_to_enum(arduino_substring: str, click_index: int) -> Optio
     :param click_index: indeks kolejnych klikniec
     :return: enum typu MorseCodeSymbol
     """
+    # TODO - make it more generic - abs(len(arduino_substring) - X * CHARACTERS_PER_TIME_UNIT) <= MARGIN_OF_ERROR,
+    #  do not use if-else chain, use dict instead, key - X, value - symbol, maybe for loop over keys ?
     if click_index % 2 != 0:
         if abs(len(arduino_substring) - CHARACTERS_PER_TIME_UNIT) <= MARGIN_OF_ERROR:  # spacja pomiedzy "." a "-"
             return MorseCodeSymbol.One
@@ -65,7 +67,11 @@ def convert_from_morse_to_arduino(morse_code: str) -> str:
     result = 14 * '1'  # imitacja tego co arduino wyrzuci zanim zaczniemy tlumaczyc faktyczny input
     toggle = 0
     for idx, symbol in enumerate(morse_code):
+        # TODO - why seed is changed each time?
         seed(1)
+
+        # TODO - make it more generic - randint(const_value*X-const_error, const_value*X+const_error),
+        #  do not use if-else chain, use dict instead, key - symbol, value - X
         if symbol == '.':
             result += randint(CHARACTERS_PER_TIME_UNIT - MARGIN_OF_ERROR,
                               CHARACTERS_PER_TIME_UNIT + MARGIN_OF_ERROR) * str(toggle)
@@ -109,6 +115,7 @@ def convert_from_arduino_to_morse(arduino_data: str) -> str:
                 f'Click_index = {click_index}, substring = {arduino_data[end_of_substring_index:idx]}, '
                 f'length: {len(arduino_data[end_of_substring_index:idx])}, '
                 f'result: Enum -> {result}, Value -> {result.value}')
+            # TODO use 'in' instead == or ===
             if result == MorseCodeSymbol.Dot or result == MorseCodeSymbol.Dash:
                 nr_of_spaces = 0
                 result_in_morse += result.value

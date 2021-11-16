@@ -3,6 +3,7 @@ from .utils import load_morse_code_dict
 MORSE_CODE_DICT = load_morse_code_dict()
 
 
+# TODO add typing
 def encrypt_to_morse(message):
     cipher = ''
     for letter in message:
