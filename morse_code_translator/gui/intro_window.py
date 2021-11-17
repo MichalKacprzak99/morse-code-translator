@@ -3,7 +3,7 @@ from pathlib import Path
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QPropertyAnimation
 from PyQt5.QtGui import QFont
-from morse_code_translator.gui.custom_elements import CustomLabel
+from .custom_elements import CustomLabel
 import numpy as np
 
 

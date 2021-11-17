@@ -5,8 +5,8 @@ from typing import Optional
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QObject, QThread, QThreadPool, pyqtSignal
 
-from morse_code_translator.gui.intro_window import IntroWindow
-from morse_code_translator.gui.morse_translator import ArduinoDataCollector, MorseTranslator
+from .intro_window import IntroWindow
+from .utils import ArduinoDataCollector, MorseTranslator
 
 
 class UiMainWindow(QObject):
