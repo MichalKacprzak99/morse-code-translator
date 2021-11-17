@@ -3,7 +3,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QLabel
 
 
-class CustomLabel(QLabel):
+class FontChangeableLabel(QLabel):
     def __init__(self, parent, name=""):
         super().__init__(name, parent)
         self._font = self.fontInfo().pointSize()

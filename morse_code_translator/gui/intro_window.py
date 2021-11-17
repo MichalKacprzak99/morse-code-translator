@@ -3,7 +3,7 @@ from pathlib import Path
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QPropertyAnimation
 from PyQt5.QtGui import QFont
-from morse_code_translator.gui.custom_elements import CustomLabel
+from .custom_elements import FontChangeableLabel
 import numpy as np
 
 
@@ -23,7 +23,7 @@ class UiIntroWindow(object):
         self.intro_image.setPixmap(QtGui.QPixmap(str((current_dir / "resources/morse_code_project_logo.png"))))
         self.intro_image.setObjectName("intro_image")
 
-        self.intro_label = CustomLabel(self.central_widget)
+        self.intro_label = FontChangeableLabel(self.central_widget)
         self.intro_label.setGeometry(QtCore.QRect(180, 560, 271, 41))
         self.intro_label.setAlignment(QtCore.Qt.AlignCenter)
         self.intro_label.setObjectName("intro_label")
