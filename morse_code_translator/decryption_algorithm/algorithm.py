@@ -96,6 +96,7 @@ def convert_from_morse_to_arduino(morse_code: str) -> str:
     return result
 
 
+# TODO add time_unit parameter - user sets this in gui
 def convert_from_arduino_to_morse(arduino_data: str) -> str:
     result_in_morse = ''
     result_in_english = ''
