@@ -2,15 +2,18 @@ import logging
 from random import seed, randint
 from typing import Optional
 
+from morse_code_symbol import MorseCodeSymbol
 from morse_code_translation import decrypt_from_morse
 from morse_code_translation import encrypt_to_morse
-from morse_code_symbol import MorseCodeSymbol
 
 # constants
-TIME_UNIT = 1
+TIME_UNIT = 1  # defaultowy time unit
 INTERVAL = 0.1
 CHARACTERS_PER_TIME_UNIT = int(TIME_UNIT / INTERVAL)
 MARGIN_OF_ERROR = 3
+GAP_BETWEEN_SYMBOLS = 1
+GAP_BETWEEN_LETTERS = 3
+GAP_BETWEEN_WORDS = 7
 
 # logger
 logging.basicConfig(filename='algorithm.log',
@@ -42,9 +45,11 @@ def translate_numbers_to_enum(arduino_substring: str, click_index: int) -> Optio
     if click_index % 2 != 0:
         if abs(len(arduino_substring) - CHARACTERS_PER_TIME_UNIT) <= MARGIN_OF_ERROR:  # spacja pomiedzy "." a "-"
             return MorseCodeSymbol.One
-        elif abs(len(arduino_substring) - 3 * CHARACTERS_PER_TIME_UNIT) <= MARGIN_OF_ERROR:  # spacja pomiedzy literami
+        elif abs(
+                len(arduino_substring) - GAP_BETWEEN_LETTERS * CHARACTERS_PER_TIME_UNIT) <= MARGIN_OF_ERROR:  # spacja pomiedzy literami
             return MorseCodeSymbol.Three
-        elif abs(len(arduino_substring) - 7 * CHARACTERS_PER_TIME_UNIT) <= MARGIN_OF_ERROR:  # spacja pomiedzy slowami
+        elif abs(
+                len(arduino_substring) - GAP_BETWEEN_WORDS * CHARACTERS_PER_TIME_UNIT) <= MARGIN_OF_ERROR:  # spacja pomiedzy slowami
             return MorseCodeSymbol.Seven
         else:
             print(
@@ -54,9 +59,10 @@ def translate_numbers_to_enum(arduino_substring: str, click_index: int) -> Optio
     else:
         if abs(len(arduino_substring) - CHARACTERS_PER_TIME_UNIT) <= MARGIN_OF_ERROR:  # "."
             return MorseCodeSymbol.Dot
-        elif abs(len(arduino_substring) - 3 * CHARACTERS_PER_TIME_UNIT) <= MARGIN_OF_ERROR:  # "-"
+        elif abs(len(arduino_substring) - GAP_BETWEEN_LETTERS * CHARACTERS_PER_TIME_UNIT) <= MARGIN_OF_ERROR:  # "-"
             return MorseCodeSymbol.Dash
-        elif abs(len(arduino_substring) - 7 * CHARACTERS_PER_TIME_UNIT) <= MARGIN_OF_ERROR:  # spacja pomiedzy slowami
+        elif abs(
+                len(arduino_substring) - GAP_BETWEEN_WORDS * CHARACTERS_PER_TIME_UNIT) <= MARGIN_OF_ERROR:  # spacja pomiedzy slowami
             return MorseCodeSymbol.Seven
         else:
             raise Exception(f'Przekroczono mozliwy margines bledu, liczba znakow: {len(arduino_substring)}')
@@ -66,23 +72,12 @@ def convert_from_morse_to_arduino(morse_code: str) -> str:
     decrypt_from_morse(morse_code)
     result = 14 * '1'  # imitacja tego co arduino wyrzuci zanim zaczniemy tlumaczyc faktyczny input
     toggle = 0
+    seed(1)
+    x = 1
+    symbol_to_gap = {'.': GAP_BETWEEN_SYMBOLS, '-': GAP_BETWEEN_LETTERS, ' ': GAP_BETWEEN_WORDS}
     for idx, symbol in enumerate(morse_code):
-        # TODO - why seed is changed each time?
-        seed(1)
-
-        # TODO - make it more generic - randint(const_value*X-const_error, const_value*X+const_error),
-        #  do not use if-else chain, use dict instead, key - symbol, value - X
-        if symbol == '.':
-            result += randint(CHARACTERS_PER_TIME_UNIT - MARGIN_OF_ERROR,
-                              CHARACTERS_PER_TIME_UNIT + MARGIN_OF_ERROR) * str(toggle)
-        elif symbol == '-':
-            result += randint(CHARACTERS_PER_TIME_UNIT * 3 - MARGIN_OF_ERROR,
-                              CHARACTERS_PER_TIME_UNIT * 3 + MARGIN_OF_ERROR) * str(toggle)
-        elif symbol == ' ':
-            result += randint(CHARACTERS_PER_TIME_UNIT * 7 - MARGIN_OF_ERROR,
-                              CHARACTERS_PER_TIME_UNIT * 7 + MARGIN_OF_ERROR) * str(toggle)
-        else:
-            raise Exception('Niespodziewana wartosc')
+        result += randint(CHARACTERS_PER_TIME_UNIT * symbol_to_gap.get(symbol) - MARGIN_OF_ERROR,
+                          CHARACTERS_PER_TIME_UNIT * symbol_to_gap.get(symbol) + MARGIN_OF_ERROR) * str(toggle)
 
         # dodanie spacji po symbolu "." lub "-"
         if idx + 1 < len(morse_code) - 1:
@@ -96,8 +91,9 @@ def convert_from_morse_to_arduino(morse_code: str) -> str:
     return result
 
 
-# TODO add time_unit parameter - user sets this in gui
-def convert_from_arduino_to_morse(arduino_data: str) -> str:
+def convert_from_arduino_to_morse(arduino_data: str, time_unit: int) -> str:
+    global TIME_UNIT
+    TIME_UNIT = time_unit
     result_in_morse = ''
     result_in_english = ''
     click_index = 0  # ktore to klikniecie z kolei
@@ -107,7 +103,7 @@ def convert_from_arduino_to_morse(arduino_data: str) -> str:
     for idx, val in enumerate(arduino_data):
         if temp_val != val:
             click_index += 1
-            if nr_of_spaces == 2:
+            if nr_of_spaces in 2:
                 result_in_english += ' '  # skoro 2x MorseCodeSymbol.Seven -> dodajemy spacje do rezultatu
                 # resetujemy indeks klikniec prez zalozenie parzystosci (patrz translate_numbers_to_enum)
                 click_index = 0
@@ -116,16 +112,15 @@ def convert_from_arduino_to_morse(arduino_data: str) -> str:
                 f'Click_index = {click_index}, substring = {arduino_data[end_of_substring_index:idx]}, '
                 f'length: {len(arduino_data[end_of_substring_index:idx])}, '
                 f'result: Enum -> {result}, Value -> {result.value}')
-            # TODO use 'in' instead == or ===
-            if result == MorseCodeSymbol.Dot or result == MorseCodeSymbol.Dash:
+            if result in MorseCodeSymbol.Dot or result in MorseCodeSymbol.Dash:
                 nr_of_spaces = 0
                 result_in_morse += result.value
-            elif result == MorseCodeSymbol.Three:  # MorseCodeSymbol.Three - spacja pomiedzy literami
+            elif result in MorseCodeSymbol.Three:  # MorseCodeSymbol.Three - spacja pomiedzy literami
                 nr_of_spaces = 0
                 result_in_english += decrypt_from_morse(
                     result_in_morse.upper())  # skoro ltera gotowa, mozna rozszyfrowac
                 result_in_morse = ''  # resetujemy zmienna trzymajaca symbole
-            elif result == MorseCodeSymbol.Seven:  # MorseCodeSymbol.Seven - spacja pomiedzy slowami
+            elif result in MorseCodeSymbol.Seven:  # MorseCodeSymbol.Seven - spacja pomiedzy slowami
                 nr_of_spaces += 1
                 result_in_morse += ' '
             else:
@@ -150,5 +145,5 @@ def main():
     print(f'4. [FINAL] Decrypted text from arduino-alike to human-alike:\n\t{decrypted}\n')
 
 
-if __name__ == '__main__':
+if __name__ in '__main__':
     main()
