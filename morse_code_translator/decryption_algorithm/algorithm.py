@@ -2,9 +2,9 @@ import logging
 from random import seed, randint
 from typing import Optional
 
-from morse_code_translation import decrypt_from_morse
-from morse_code_translation import encrypt_to_morse
-from morse_code_symbol import MorseCodeSymbol
+from .morse_code_translation import decrypt_from_morse
+from .morse_code_translation import encrypt_to_morse
+from .morse_code_symbol import MorseCodeSymbol
 
 # constants
 TIME_UNIT = 1
