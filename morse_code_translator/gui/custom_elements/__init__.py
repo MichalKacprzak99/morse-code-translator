@@ -1,1 +1,1 @@
-from .custom_label import CustomLabel
+from .font_changeable_label import FontChangeableLabel
