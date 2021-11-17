@@ -140,7 +140,7 @@ class UiMainWindow(QObject):
 
 
 class MainWindow(UiMainWindow):
-    stop_signal = pyqtSignal()
+    stop_simulation_signal = pyqtSignal()
 
     def __init__(self, start_window):
         super().__init__()
@@ -177,19 +177,21 @@ class MainWindow(UiMainWindow):
 
             self.morse_translator = MorseTranslator(int(unit_length))
 
-            self.stop_signal.connect(self.morse_translator.stop_translation)
+            self.stop_simulation_signal.connect(self.morse_translator.stop_translation)
             self.morse_translator.signals.translated_morse_code.connect(self._update_translated_morse_code_text)
             self.morse_translator.signals.morse_code.connect(self._update_morse_code_text)
             self.thread_pool.start(self.morse_translator)
 
-            self.arduino_data_collector.collected_arduino_data.connect(self.morse_translator.read_arduino)
+            self.arduino_data_collector.collected_arduino_data.connect(self.morse_translator.catch_arduino_data)
             self.thread.start()
         else:
             self.select_error.show()
 
     def _stop_translation(self):
         self.start_stop_button.setText(self.translate("main_window", "Start"))
-        self.stop_signal.emit()
+        self.morse_code_text.setText(self.translate("main_window", ""))
+        self.translated_morse_code_text.setText(self.translate("main_window", ""))
+        self.stop_simulation_signal.emit()
         self.arduino_data_collector.stop()
         self.thread.quit()
         self.thread.wait()
