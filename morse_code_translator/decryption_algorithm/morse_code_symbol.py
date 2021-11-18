@@ -10,3 +10,4 @@ class MorseCodeSymbol(Enum):
     Dot = '.'
     Dash = '-'
     Default = 'MorseCodeSymbol.Default'
+    Error = '#'
