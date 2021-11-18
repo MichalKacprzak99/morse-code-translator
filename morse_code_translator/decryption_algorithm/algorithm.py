@@ -2,9 +2,9 @@ import logging
 from random import randint
 from typing import Optional
 
-from morse_code_translation import decrypt_from_morse
-from morse_code_translation import encrypt_to_morse
-from morse_code_symbol import MorseCodeSymbol
+from morse_code_translator.decryption_algorithm.morse_code_translation import decrypt_from_morse
+from morse_code_translator.decryption_algorithm.morse_code_translation import encrypt_to_morse
+from morse_code_translator.decryption_algorithm.morse_code_symbol import MorseCodeSymbol
 
 # constants
 MARGIN_OF_ERROR = 3
@@ -40,8 +40,10 @@ def translate_numbers_to_enum(arduino_substring: str, click_index: int,
     :return: enum typu MorseCodeSymbol
     """
     gap_to_symbols = {
-        GAP_BETWEEN_SYMBOLS: MorseCodeSymbol.One if click_index % 2 != 0 else MorseCodeSymbol.Dot,  # space beetween "." and "-" or '.'
-        GAP_BETWEEN_LETTERS: MorseCodeSymbol.Three if click_index % 2 != 0 else MorseCodeSymbol.Dash, # space beetween letters or "-"
+        GAP_BETWEEN_SYMBOLS: MorseCodeSymbol.One if click_index % 2 != 0 else MorseCodeSymbol.Dot,
+        # space beetween "." and "-" or '.'
+        GAP_BETWEEN_LETTERS: MorseCodeSymbol.Three if click_index % 2 != 0 else MorseCodeSymbol.Dash,
+        # space beetween letters or "-"
         GAP_BETWEEN_WORDS: MorseCodeSymbol.Seven,  # space between words
     }
 
@@ -50,9 +52,11 @@ def translate_numbers_to_enum(arduino_substring: str, click_index: int,
             return symbol
     else:
         if click_index % 2 == 0:
-            raise Exception(f'Przekroczono mozliwy margines bledu, liczba znakow: {len(arduino_substring)}')
+            print(f'Przekroczono mozliwy margines bledu, liczba znakow: {len(arduino_substring)}')
+            return MorseCodeSymbol.Error
         else:
-            print('\t(Disclaimer): poczatkowy ciag znakow prawdopodobnie bedzie wykraczal poza ustalony margines bledu.\n')
+            print(
+                '\t(Disclaimer): poczatkowy ciag znakow prawdopodobnie bedzie wykraczal poza ustalony margines bledu.\n')
             return MorseCodeSymbol.Default
 
 
@@ -130,8 +134,10 @@ def main():
     text_in_arduino = convert_from_morse_to_arduino(morse_code=encrypted, time_unit=1, interval=0.1)
     print(f'3. Text converted from morse code to possible arduino-alike:\n\t{text_in_arduino}')
 
-    decrypted = decrypt_from_morse(convert_from_arduino_to_morse(arduino_data=text_in_arduino,
-                                                                 time_unit=1, interval=0.1))
+    morse_code_from_arduino = convert_from_arduino_to_morse(arduino_data=text_in_arduino, time_unit=1, interval=0.1)
+    print(f'4. [MOrse] Decrypted text from arduino-alike to morse-alike:\n\t{morse_code_from_arduino}\n')
+
+    decrypted = decrypt_from_morse(morse_code_from_arduino)
     print(f'4. [FINAL] Decrypted text from arduino-alike to human-alike:\n\t{decrypted}\n')
 
 
