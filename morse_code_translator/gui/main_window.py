@@ -157,7 +157,7 @@ class MainWindow(UiMainWindow):
         self.morse_translator.signals.morse_code.connect(self._update_morse_code_text)
 
         self.thread = QThread()
-        self.arduino_data_collector = ArduinoDataCollector(arduino_port='COM4', arduino_baudrate=9600)
+        self.arduino_data_collector = ArduinoDataCollector(arduino_port='COM6', arduino_baudrate=9600)
         self.arduino_data_collector.signals.collected_arduino_data.connect(self.morse_translator.catch_arduino_data)
         self.arduino_data_collector.moveToThread(self.thread)
         self.thread.started.connect(self.arduino_data_collector.start)
