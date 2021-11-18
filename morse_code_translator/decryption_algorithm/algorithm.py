@@ -44,6 +44,7 @@ def translate_numbers_to_enum(arduino_substring: str, click_index: int,
         GAP_BETWEEN_LETTERS: MorseCodeSymbol.Three if click_index % 2 != 0 else MorseCodeSymbol.Dash, # space beetween letters or "-"
         GAP_BETWEEN_WORDS: MorseCodeSymbol.Seven,  # space between words
     }
+
     for gap, symbol in gap_to_symbols.items():
         if abs(len(arduino_substring) - gap * characters_per_time_unit) <= MARGIN_OF_ERROR:  # spacja pomiedzy "." a "-"
             return symbol
@@ -59,13 +60,13 @@ def convert_from_morse_to_arduino(morse_code: str, time_unit: float, interval: f
     decrypt_from_morse(morse_code)
     result = 14 * '1'  # imitacja tego co arduino wyrzuci zanim zaczniemy tlumaczyc faktyczny input
     toggle = 0
-
     characters_per_time_unit = int(time_unit / interval)
     symbol_to_gap = {
         '.': GAP_BETWEEN_SYMBOLS,
         '-': GAP_BETWEEN_LETTERS,
         ' ': GAP_BETWEEN_WORDS,
     }
+
     for idx, symbol in enumerate(morse_code):
         error = randint(-MARGIN_OF_ERROR, +MARGIN_OF_ERROR)
         result += (characters_per_time_unit * symbol_to_gap.get(symbol) + error) * str(toggle)
@@ -89,6 +90,7 @@ def convert_from_arduino_to_morse(arduino_data: str, time_unit: float, interval:
     end_of_substring_index = 0
     nr_of_spaces = 0  # potrzebne do przypadku dla spacji pomiedzy slowami, czyli wystapeinia 2x Symbols.Seven po sobie
     characters_per_unit = int(time_unit / interval)
+
     for idx, val in enumerate(arduino_data):
         if temp_val != val:
             click_index += 1
