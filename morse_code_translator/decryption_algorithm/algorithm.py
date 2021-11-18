@@ -73,11 +73,11 @@ def convert_from_morse_to_arduino(morse_code: str, time_unit: float, interval: f
         # dodanie spacji po symbolu "." lub "-"
         if idx + 1 < len(morse_code) - 1:
             if morse_code[idx] != ' ' and morse_code[idx + 1] != ' ':
-                toggle = (int(toggle) + 1) % 2
+                toggle = (toggle + 1) % 2
                 result += randint(characters_per_time_unit - MARGIN_OF_ERROR,
                                   characters_per_time_unit + MARGIN_OF_ERROR) * str(toggle)
 
-        toggle = (int(toggle) + 1) % 2
+        toggle = (toggle + 1) % 2
 
     return result
 
