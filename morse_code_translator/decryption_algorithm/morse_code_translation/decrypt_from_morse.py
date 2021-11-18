@@ -3,8 +3,7 @@ from .utils import load_morse_code_dict
 MORSE_CODE_DICT = load_morse_code_dict()
 
 
-# TODO add typing
-def decrypt_from_morse(message):
+def decrypt_from_morse(message: str) -> str:
     # extra space added at the end to access the
     # last morse code
     message += ' '
@@ -14,7 +13,7 @@ def decrypt_from_morse(message):
     for letter in message:
 
         # checks for space
-        if (letter != ' '):
+        if letter != ' ':
 
             # counter to keep track of space
             i = 0
