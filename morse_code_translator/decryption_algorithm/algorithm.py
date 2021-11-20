@@ -190,7 +190,7 @@ def convert_from_arduino_to_morse(arduino_data: str, time_unit: float, interval:
 
 
 def main():
-    text = "This is SPARTA"
+    text = "This is AGH"
     print(f'1. Original human-like text:\n\t{text}\n')
 
     encrypted = encrypt_to_morse(text.upper())
@@ -199,11 +199,12 @@ def main():
     text_in_arduino = convert_from_morse_to_arduino(morse_code=encrypted, time_unit=1, interval=0.1)
     print(f'3. Text converted from morse code to possible arduino-alike:\n\t{text_in_arduino}')
 
-    morse_code_from_arduino = convert_from_arduino_to_morse(arduino_data=text_in_arduino, time_unit=1, interval=0.1)
+    morse_code_from_arduino, result = convert_from_arduino_to_morse(arduino_data=text_in_arduino,
+                                                                    time_unit=1, interval=0.1)
     print(f'4. [Morse] Decrypted text from arduino-alike to morse-alike:\n\t{morse_code_from_arduino}\n')
 
-    decrypted = decrypt_from_morse(morse_code_from_arduino[0])
-    print(f'4. [FINAL] Decrypted text from arduino-alike to human-alike:\n\t{decrypted}\n')
+    decrypted = decrypt_from_morse(morse_code_from_arduino)
+    print(f'4. [FINAL] Decrypted text from morse to human-alike:\n\t{decrypted}\n')
 
 
 if __name__ in '__main__':
