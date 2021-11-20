@@ -170,6 +170,7 @@ class MainWindow(UiMainWindow):
         self.instruction_button.clicked.connect(self.show_instruction)
         self.start_stop_button.clicked.connect(self.handle_translation)
         self.unit_length_select.currentIndexChanged.connect(self.on_unit_length_select_change)
+        self.analyze_button.clicked.connect(self.visualize_translation_statistics)
 
         self.morse_translator = MorseTranslator()
         self.morse_translator.signals.translated_morse_code.connect(self._update_translated_morse_code_text)
@@ -224,6 +225,10 @@ class MainWindow(UiMainWindow):
     def show_instruction():
         instruction_path = Path(__file__).parent / "resources/instruction.pdf"
         webbrowser.open_new(str(instruction_path))
+
+    def visualize_translation_statistics(self):
+        save_statistics_to = QtWidgets.QFileDialog.getExistingDirectory(self.start_window)
+        self.morse_translator.visualize_translation_statistics(save_statistics_to=Path(save_statistics_to))
 
     def start_application(self):
         self.intro_window.start()
