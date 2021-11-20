@@ -38,10 +38,9 @@ class UiMainWindow(QObject):
         self.text_vertical_layout.setObjectName("text_vertical_layout")
 
         font = QtGui.QFont()
-        font.setPointSize(12)
+        font.setPointSize(16)
 
         self.morse_code_text = QtWidgets.QTextBrowser(self.verticalLayoutWidget_2)
-
         self.morse_code_text.setFont(font)
         self.morse_code_text.setReadOnly(False)
         self.morse_code_text.setObjectName("morse_code_text")
@@ -70,7 +69,6 @@ class UiMainWindow(QObject):
         self.select_error.setGeometry(QtCore.QRect(50, 60, 200, 81))
         self.select_error.hide()
         self.select_error.setObjectName("footer")
-
 
         self.unit_length_select = QtWidgets.QComboBox(self.verticalLayoutWidget)
         font = QtGui.QFont()
@@ -111,21 +109,42 @@ class UiMainWindow(QObject):
         self.translate = QtCore.QCoreApplication.translate
         self.start_window.setWindowTitle(self.translate("main_window", "main_window"))
         self.title.setText(self.translate("main_window", "Morse code translator"))
-        self.select_error.setText(self.translate("main_window", "<font color='red'>Error! Please select unit length!</font>"))
-        self.footer.setText(self.translate("main_window",
-                                           "<html><head/><body><p align=\"center\">Michał Kacprzak &amp; Jakub Strugała</p><p align=\"center\">Komputeryzacja pomiarów 2021, Wydział Fizyki i Informatyki Stosowanej</p></body></html>"))
-        self.morse_code_text.setHtml(self.translate("main_window",
-                                                    "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-                                                    "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-                                                    "p, li { white-space: pre-wrap; }\n"
-                                                    "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:12pt; font-weight:400; font-style:normal;\">\n"
-                                                    "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Morse code</p></body></html>"))
-        self.translated_morse_code_text.setHtml(self.translate("main_window",
-                                                               "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-                                                               "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-                                                               "p, li { white-space: pre-wrap; }\n"
-                                                               "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.8pt; font-weight:400; font-style:normal;\">\n"
-                                                               "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:12pt;\">Translated morse code</span></p></body></html>"))
+        self.select_error.setText(
+            self.translate("main_window", "<font color='red'>Error! Please select unit length!</font>"))
+        self.footer.setText(
+            "<html>"
+            "<head/>"
+            "<body>"
+            "<p align=\"center\">Michał Kacprzak &amp; Jakub Strugała</p>"
+            "<p align=\"center\">Komputeryzacja pomiarów 2021, Wydział Fizyki i Informatyki Stosowanej</p>"
+            "</body>"
+            "</html>")
+        self.morse_code_text.setHtml(
+            "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+            "<html>"
+            "<head>"
+            "<meta name=\"qrichtext\" content=\"1\" />"
+            "<style type=\"text/css\">\n"
+            "p, li { white-space: pre-wrap; }\n"
+            "</style>"
+            "</head>"
+            "<body style=\" font-family:\'MS Shell Dlg 2\'; font-weight:400; font-style:normal;\">\n"
+            "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Morse code</p>"
+            "</body>"
+            "</html>")
+        self.translated_morse_code_text.setHtml(
+            "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+            "<html>"
+            "<head>"
+            "<meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+            "p, li { white-space: pre-wrap; }\n"
+            "</style>"
+            "</head>"
+            "<body style=\" font-family:\'MS Shell Dlg 2\'; font-weight:400; font-style:normal;\">\n"
+            "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Translated morse code</p>"
+            "</body>"
+            "</html>")
+
         self.start_stop_button.setText(self.translate("main_window", "Start"))
 
         self.unit_length_select.setItemText(0, self.translate("main_window", "Select unit length in seconds"))
@@ -171,8 +190,8 @@ class MainWindow(UiMainWindow):
     def _start_translation(self):
         if self.unit_length_select.currentIndex() != 0:
             self.start_stop_button.setText(self.translate("main_window", "Stop"))
-            self.morse_code_text.setText(self.translate("main_window", "Morse code"))
-            self.translated_morse_code_text.setText(self.translate("main_window", "Translated morse code"))
+            self.morse_code_text.setHtml("Morse code")
+            self.translated_morse_code_text.setHtml("Translated morse code")
 
             self.thread.start()
         else:
@@ -180,8 +199,8 @@ class MainWindow(UiMainWindow):
 
     def _stop_translation(self):
         self.start_stop_button.setText(self.translate("main_window", "Start"))
-        self.morse_code_text.setText(self.translate("main_window", ""))
-        self.translated_morse_code_text.setText(self.translate("main_window", ""))
+        self.morse_code_text.setHtml(self.translate("main_window", ""))
+        self.translated_morse_code_text.setHtml(self.translate("main_window", ""))
 
         self.arduino_data_collector.stop()
 
@@ -192,10 +211,10 @@ class MainWindow(UiMainWindow):
         self.thread.wait()
 
     def _update_morse_code_text(self, morse_code_sign):
-        self.morse_code_text.insertPlainText(self.translate("main_window", morse_code_sign))
+        self.morse_code_text.setHtml(self.translate("main_window", morse_code_sign))
 
     def _update_translated_morse_code_text(self, translated_char):
-        self.translated_morse_code_text.insertPlainText(self.translate("main_window", translated_char))
+        self.translated_morse_code_text.setHtml(self.translate("main_window", translated_char))
 
     def on_unit_length_select_change(self, index):
         if index != 0:
