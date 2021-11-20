@@ -1,7 +1,6 @@
-import json
 import logging
 from random import randint
-from typing import Optional
+from typing import Optional, Tuple
 
 from morse_code_translator.decryption_algorithm.morse_code_symbol import MorseCodeSymbol
 from morse_code_translator.decryption_algorithm.morse_code_translation import decrypt_from_morse
@@ -117,7 +116,7 @@ def convert_from_morse_to_arduino(morse_code: str, time_unit: float, interval: f
     return result
 
 
-def convert_from_arduino_to_morse(arduino_data: str, time_unit: float, interval: float) -> str:
+def convert_from_arduino_to_morse(arduino_data: str, time_unit: float, interval: float) -> Tuple[str, dict]:
     result_in_morse = ''
     click_index = 0  # index of each click
     temp_val = arduino_data[0]  # initial value (0 or 1) needed to check the stream changed
@@ -171,11 +170,7 @@ def convert_from_arduino_to_morse(arduino_data: str, time_unit: float, interval:
             temp_val = val
             end_of_substring_index = idx
 
-    # save collected to json file
-    with open("stats.json", "w") as write_file:
-        json.dump(stats, write_file, indent=4)
-
-    return result_in_morse.strip()
+    return result_in_morse.strip(), stats
 
 
 def main():
@@ -191,7 +186,7 @@ def main():
     morse_code_from_arduino = convert_from_arduino_to_morse(arduino_data=text_in_arduino, time_unit=1, interval=0.1)
     print(f'4. [Morse] Decrypted text from arduino-alike to morse-alike:\n\t{morse_code_from_arduino}\n')
 
-    decrypted = decrypt_from_morse(morse_code_from_arduino)
+    decrypted = decrypt_from_morse(morse_code_from_arduino[0])
     print(f'4. [FINAL] Decrypted text from arduino-alike to human-alike:\n\t{decrypted}\n')
 
 
