@@ -53,7 +53,7 @@ def visualize_translation_statistics(translation_statistics: dict, save_statisti
 
     ax2.set_xticks(idx)
     ax2.set_xticklabels(bar_column_names, fontsize=17)
-    ax2.set_title('Number of sumbols', fontsize=20)
+    ax2.set_title('Number of symbols', fontsize=20)
     ax2.set_xlabel('Symbols', fontsize=25)
     ax2.set_ylabel('Number of counts', fontsize=20)
 
