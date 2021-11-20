@@ -102,15 +102,14 @@ def convert_from_morse_to_arduino(morse_code: str, time_unit: float, interval: f
                 # if next symbol is space as well, append gap=7 and omit adding next symbol
                 if morse_code[idx + 1] == ' ':
                     omit_flag = True
-                    result += randint(characters_per_time_unit * GAP_BETWEEN_WORDS - MARGIN_OF_ERROR,
-                                      characters_per_time_unit * GAP_BETWEEN_WORDS + MARGIN_OF_ERROR) * str(toggle)
-                # if not, append gap=3 and proceed
+                    gap = GAP_BETWEEN_WORDS
                 else:
-                    result += randint(characters_per_time_unit * GAP_BETWEEN_LETTERS - MARGIN_OF_ERROR,
-                                      characters_per_time_unit * GAP_BETWEEN_LETTERS + MARGIN_OF_ERROR) * str(toggle)
+                    gap = GAP_BETWEEN_LETTERS
             else:
-                result += randint(characters_per_time_unit * GAP_BETWEEN_LETTERS - MARGIN_OF_ERROR,
-                                  characters_per_time_unit * GAP_BETWEEN_LETTERS + MARGIN_OF_ERROR) * str(toggle)
+                gap = GAP_BETWEEN_LETTERS
+
+            result += randint(characters_per_time_unit * gap - MARGIN_OF_ERROR,
+                              characters_per_time_unit * gap + MARGIN_OF_ERROR) * str(toggle)
 
         toggle = (toggle + 1) % 2
     return result
@@ -124,21 +123,36 @@ def convert_from_arduino_to_morse(arduino_data: str, time_unit: float, interval:
     characters_per_unit = int(time_unit / interval)
 
     stats = {
+        'characters_per_unit': characters_per_unit,
         'error_margin': MARGIN_OF_ERROR,
-        'dot': [],
-        'dash': [],
-        'space_between_symbols': [],
-        'space_between_letters': [],
-        'space_between_words': [],
-        'error': []
+        'dot': {
+            "data": [],
+            "symbol_characters": 1
+        },
+        'dash': {
+            "data": [],
+            "symbol_characters": 3
+        },
+        'space_symbols': {
+            "data": [],
+            "symbol_characters": GAP_BETWEEN_SYMBOLS
+        },
+        'space_letters': {
+            "data": [],
+            "symbol_characters": GAP_BETWEEN_LETTERS
+        },
+        'space_words': {
+            "data": [],
+            "symbol_characters": GAP_BETWEEN_WORDS
+        },
     }
 
     enum_to_stats_key = {
         MorseCodeSymbol.Dot: 'dot',
         MorseCodeSymbol.Dash: 'dash',
-        MorseCodeSymbol.One: 'space_between_symbols',
-        MorseCodeSymbol.Three: 'space_between_letters',
-        MorseCodeSymbol.Seven: 'space_between_words',
+        MorseCodeSymbol.One: 'space_symbols',
+        MorseCodeSymbol.Three: 'space_letters',
+        MorseCodeSymbol.Seven: 'space_words',
         MorseCodeSymbol.Error: 'error'
     }
 
@@ -155,7 +169,9 @@ def convert_from_arduino_to_morse(arduino_data: str, time_unit: float, interval:
 
             # append data to stats object
             try:
-                stats[enum_to_stats_key.get(result)].append(len(arduino_data[end_of_substring_index:idx]))
+                stats[enum_to_stats_key.get(result)].get("data").append(
+                    len(arduino_data[end_of_substring_index:idx])
+                )
             except KeyError:
                 print(f'\tKey: {result} in enum_to_stats_key not found.\n')
 
