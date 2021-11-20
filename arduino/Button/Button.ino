@@ -22,15 +22,11 @@ TKButton button(I0);	// creating the object 'button' that belongs to the 'TKButt
 
 
 void setup() {
-//nothing here
 Serial.begin(9600);
 }
 
 void loop()
 {
-  // check the switchState of the button
-                    
-
   if (button.readSwitch() == HIGH) {	  
     Serial.print(1); 
   } 
