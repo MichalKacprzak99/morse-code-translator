@@ -1,13 +1,12 @@
 from enum import Enum, unique
 
 
-# value dla One, Three, Seven i Default nie jest auto() dla przejrzystych logow
 @unique
 class MorseCodeSymbol(Enum):
-    One = 'MorseCodeSymbol.One'  # spacja pomiedzy ".", "-"
-    Three = 'MorseCodeSymbol.Three'  # spacja pomiedzy literami
-    Seven = 'MorseCodeSymbol.Seven'  # spacja pomiedzy slowami
+    One = 'MorseCodeSymbol.One'  # space between "." or "-"
+    Three = 'MorseCodeSymbol.Three'  # space between letters
+    Seven = 'MorseCodeSymbol.Seven'  # space between words
     Dot = '.'
     Dash = '-'
     Default = 'MorseCodeSymbol.Default'
-    Error = '#'
+    Error = '?'
