@@ -28,14 +28,14 @@ def decrypt_from_morse(message: str) -> str:
 
             # if i = 2 that indicates a new word
             if i == 2:
-
                 # adding space to separate words
                 decipher += ' '
             else:
-
                 # accessing the keys using their values (reverse of encryption)
-                decipher += list(MORSE_CODE_DICT.keys())[list(MORSE_CODE_DICT
-                                                              .values()).index(citext)]
+                try:
+                    decipher += list(MORSE_CODE_DICT.keys())[list(MORSE_CODE_DICT.values()).index(citext)]
+                except ValueError:
+                    decipher += '?'
                 citext = ''
 
     return decipher
