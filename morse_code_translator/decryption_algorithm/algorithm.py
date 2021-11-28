@@ -10,7 +10,6 @@ from morse_code_translator.decryption_algorithm.morse_code_translation.utils imp
 MORSE_CODE_DICT = load_morse_code_dict()
 
 # constants
-MARGIN_OF_ERROR = 3
 GAP_BETWEEN_SYMBOLS = 1
 GAP_BETWEEN_LETTERS = 3
 GAP_BETWEEN_WORDS = 7
@@ -48,6 +47,7 @@ def translate_numbers_to_enum(arduino_substring: str, click_index: int,
     :param click_index: ordinal number of clicks
     :return: enum representing each symbol
     """
+    error_margin = int(characters_per_time_unit * 30 / 100)
     gap_to_symbols = {
         # space between "." and "-" or '.'
         GAP_BETWEEN_SYMBOLS: MorseCodeSymbol.One if click_index % 2 != 0 else MorseCodeSymbol.Dot,
@@ -58,7 +58,7 @@ def translate_numbers_to_enum(arduino_substring: str, click_index: int,
     }
 
     for gap, symbol in gap_to_symbols.items():
-        if abs(len(arduino_substring) - gap * characters_per_time_unit) <= MARGIN_OF_ERROR:  # space between '.' or '-
+        if abs(len(arduino_substring) - gap * characters_per_time_unit) <= error_margin:  # space between '.' or '-
             return symbol
     else:
         if click_index % 2 == 0:
@@ -75,6 +75,7 @@ def convert_from_morse_to_arduino(morse_code: str, time_unit: float, interval: f
     result = 14 * '1'  # imitate what arduino might send before we start translating its data
     toggle = 0
     characters_per_time_unit = int(time_unit / interval)
+    error_margin = int(characters_per_time_unit * 30 / 100)
     symbol_to_gap = {
         '.': GAP_BETWEEN_SYMBOLS,
         '-': GAP_BETWEEN_LETTERS,
@@ -86,16 +87,15 @@ def convert_from_morse_to_arduino(morse_code: str, time_unit: float, interval: f
             omit_flag = False
             continue
 
-        error = randint(-MARGIN_OF_ERROR, +MARGIN_OF_ERROR)
-
         if symbol != ' ':
+            error = randint(-error_margin, +error_margin)
             result += (characters_per_time_unit * symbol_to_gap.get(symbol) + error) * str(toggle)
             # appending space after "." or "-"
             if idx + 1 < len(morse_code) - 1:
                 if morse_code[idx + 1] != ' ':
                     toggle = (toggle + 1) % 2
-                    result += randint(characters_per_time_unit - MARGIN_OF_ERROR,
-                                      characters_per_time_unit + MARGIN_OF_ERROR) * str(toggle)
+                    result += randint(characters_per_time_unit - error_margin,
+                                      characters_per_time_unit + error_margin) * str(toggle)
         # handle space symbol
         else:
             if idx + 1 < len(morse_code) - 1:
@@ -108,8 +108,8 @@ def convert_from_morse_to_arduino(morse_code: str, time_unit: float, interval: f
             else:
                 gap = GAP_BETWEEN_LETTERS
 
-            result += randint(characters_per_time_unit * gap - MARGIN_OF_ERROR,
-                              characters_per_time_unit * gap + MARGIN_OF_ERROR) * str(toggle)
+            result += randint(characters_per_time_unit * gap - error_margin,
+                              characters_per_time_unit * gap + error_margin) * str(toggle)
 
         toggle = (toggle + 1) % 2
     return result
@@ -121,10 +121,10 @@ def convert_from_arduino_to_morse(arduino_data: str, time_unit: float, interval:
     temp_val = arduino_data[0]  # initial value (0 or 1) needed to check the stream changed
     end_of_substring_index = 0
     characters_per_unit = int(time_unit / interval)
-
+    error_margin = int(characters_per_unit * 30 / 100)
     stats = {
         'characters_per_unit': characters_per_unit,
-        'error_margin': MARGIN_OF_ERROR,
+        'error_margin': error_margin,
         'dot': {
             "data": [],
             "symbol_characters": 1
