@@ -1,4 +1,4 @@
-import webbrowser
+import os
 from pathlib import Path
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -223,8 +223,8 @@ class MainWindow(UiMainWindow):
 
     @staticmethod
     def show_instruction():
-        instruction_path = Path(__file__).parent / "resources/instruction.pdf"
-        webbrowser.open_new(str(instruction_path))
+        instruction_path = Path(__file__).parents[2] / "prezi/AGH_prezentacja_3_2.pptx"
+        os.startfile(instruction_path)
 
     def visualize_translation_statistics(self):
         save_statistics_to = QtWidgets.QFileDialog.getExistingDirectory(self.start_window)
