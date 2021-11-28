@@ -29,7 +29,8 @@ def visualize_translation_statistics(translation_statistics: dict, save_statisti
         ])
 
     fig, (ax1, ax2) = plt.subplots(2, 1)
-    title = f"Morse code translation analysis: error margin = {error_margin}, characters per unit = {characters_per_unit}"
+    title = f"Morse code translation analysis: error margin = {(error_margin/characters_per_unit * 100)}%, " \
+            f"characters per unit = {characters_per_unit}"
     fig.suptitle(title, fontsize=20)
     fig.set_size_inches(12, 12)
 
